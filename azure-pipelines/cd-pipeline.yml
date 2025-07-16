@@ -1,0 +1,96 @@
+trigger: none
+
+resources:
+  pipelines:
+  - pipeline: ci
+    source: 'CI-Pipeline'
+    trigger: true
+
+stages:
+- stage: Dev
+  jobs:
+  - deployment: DeployDev
+    environment: Dev
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: '$(AzureServiceConnection)'
+              appType: 'webApp'
+              appName: 'webapp16-dev'
+              package: '$(Pipeline.Workspace)/drop/**/*.zip'
+- stage: Staging
+  dependsOn: Dev
+  condition: succeeded()
+  jobs:
+  - deployment: DeployStaging
+    environment: Staging
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: '$(AzureServiceConnection)'
+              appType: 'webApp'
+              appName: 'webapp16-staging'
+              package: '$(Pipeline.Workspace)/drop/**/*.zip'
+- stage: Production
+  dependsOn: Staging
+  condition: succeeded()
+  jobs:
+  - deployment: DeployProduction
+    environment: Production
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: '$(AzureServiceConnection)'
+              appType: 'webApp'
+              appName: 'webapp16-prod'
+              package: '$(Pipeline.Workspace)/drop/**/*.zip'
+- stage: Production
+  dependsOn: Staging
+  condition: succeeded()
+  jobs:
+  - deployment: DeployProduction
+    environment: Production
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: '$(AzureServiceConnection)'
+              appType:
+- stage: Production
+  dependsOn: Staging
+  condition: succeeded()
+  jobs:
+  - deployment: DeployProduction
+    environment: Production
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: '$(AzureServiceConnection)'
+              appType: 'webApp'
+              appName: 'webapp16-prod'
+              package: '$(Pipeline.Workspace)/drop/**/*.zip'
+
